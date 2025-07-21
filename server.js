@@ -60,10 +60,43 @@ const server = http.createServer((req, res) => {
                 return res.end(JSON.stringify({error: 'Error al editar'}));
             })
         //PATCH actuliza unicamente el mensaje
+        }else if(method === 'PATCH' && url === '/contacto'){
+            const id = url.split('/').pop();
+            const {mensaje}=JSON.parse(body)||{};
+            if (!mensaje){
+                res.writeHead(400, {'Content-Type':'application/jason'});
+                return res.end(JSON.stringify({error: 'Error al editar mensaje'}));
+            }
+            client.query('update contactos set mensaje=$1 where id=$2',[mensaje,id])
+            .then(()=>{
+                res.writeHead(200, {'Content-Type':'application/jason'});
+                return res.end(JSON.stringify({error: 'Se edito el mensaje correctamente'}));
+            })
+            .catch(err=>{
+                res.writeHead(500, {'Content-Type':'application/jason'});
+                return res.end(JSON.stringify({error: 'Error al editar el mensaje'}));
+            })
+        //DELETE para eliminar :3
+        }else if (method === 'DELETE' && url.startsWith('/api/contacto/')) {
+            const id = url.split('/').pop();
+
+            client.query('DELETE FROM contactos WHERE id=$1',[id])
+            .then(() => {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ mensaje: 'Registro eliminado' }));
+            })
+            .catch(err => {
+                console.error(err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Error al eliminar' }));
+            });
+        }else{
+            res.writeHead(404, {Content-Type': 'application/json'});
+            res.end(JSON.stringify({ error: 'Ruta no encontrada' }));
         }
     })
-})
+});
 
 server.listen(3000, () => {
     console.log("Servidor conectado en el puerto 3000");
-})
+});
