@@ -1,10 +1,21 @@
-const http = require("http");
-const client = require('./db');
+const http   = require("http");
+const client = require("./db");
 
 const server = http.createServer((req, res) => {
-    const url = req.url;
+    const url    = req.url;
     const method = req.method;
-    let body = '';
+    let body = "";
+
+  // 1) Cabeceras CORS para **todas** las respuestas
+    res.setHeader("Access-Control-Allow-Origin", "*"); // o "http://localhost:8080" para más seguridad
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // 2) Responder preflight de CORS
+    if (method === "OPTIONS") {
+        res.writeHead(204);
+        return res.end();
+    }
     //Esto escucha el evento data del objeto req, los datos de body
     //llegan en pedazos por lo que los sumamos
     req.on('data', chunk => body += chunk.toString());
@@ -43,7 +54,7 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify({error: 'Error al listar'}));
                 });
         //PUT Editar el contacto
-        }else if(method === 'PUT' && url === '/contacto/'){
+        }else if(method === 'PUT' && url.startsWith('/contacto/')){
             const id = url.split('/').pop();
             const {nombre, correo, mensaje}=JSON.parse(body)||{};
             if (!nombre || !correo || !mensaje){
@@ -60,7 +71,7 @@ const server = http.createServer((req, res) => {
                 return res.end(JSON.stringify({error: 'Error al editar'}));
             })
         //PATCH actuliza unicamente el mensaje
-        }else if(method === 'PATCH' && url === '/contacto/'){
+        }else if(method === 'PATCH' && url.startsWith('/contacto/')){
             const id = url.split('/').pop();
             const {mensaje}=JSON.parse(body)||{};
             if (!mensaje){
@@ -77,7 +88,7 @@ const server = http.createServer((req, res) => {
                 return res.end(JSON.stringify({error: 'Error al editar el mensaje'}));
             })
         //DELETE para eliminar :3
-        }else if (method === 'DELETE' && url==='/contacto/') {
+        }else if (method === 'DELETE' && url.startsWith('/contacto/')) {
             const id = url.split('/').pop();
 
             client.query('DELETE FROM contactos WHERE id=$1',[id])
