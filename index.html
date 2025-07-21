@@ -1,72 +1,146 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario con AJAx</title>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Formulario con AJAX y Listado</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+            crossorigin="anonymous"
+    />
 </head>
 <body class="bg-secondary text-white">
+<div class="container py-4">
+    <h2 class="mb-4">Formulario de Contacto</h2>
+    <form id="contactForm" class="mb-5">
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" id="nombre" name="nombre" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="correo" class="form-label">Correo</label>
+            <input type="email" id="correo" name="correo" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="mensaje" class="form-label">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
 
-<div class="content" style=" padding: 20px;">
-  <h2>Formulario de Contacto</h2>
+    <p id="respuesta"></p>
 
+    <h2 class="mt-5 mb-4">Listado de Contactos</h2>
+    <table class="table table-dark table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Mensaje</th>
+            <th>Operaciones</th>
+        </tr>
+        </thead>
+        <tbody id="tablaContactos">
+        <!-- Aquí se insertarán las filas dinámicamente -->
+        </tbody>
+    </table>
+</div>
 
-  <form id="contactForm" >//action="http://localhost:3000/contacto" method="POST"
-    <label for="nombre" class="form-label">Nombre:</label>
-    <input class="form-control" type="text" id="nombre" name="nombre" required><br><br>
+<script>
+    const apiUrl = 'http://localhost:3000/contacto';
 
-    <label for="email" class="form-label">Correo:</label>
-    <input class="form-control" type="email" id="email" name="email" required><br><br>
+    // Cargar y mostrar contactos en la tabla
+    async function cargarContactos() {
+      try {
+        const res = await fetch(apiUrl);
+        const contactos = await res.json();
+        const tbody = document.getElementById('tablaContactos');
+        tbody.innerHTML = '';
 
-    <label for="mensaje" class="form-label">Mensaje:</label><br>
-    <textarea id="mensaje" class="form-control" id="exampleFormControlTextarea1" rows="4"></textarea>
-    <br>
-    <button class="btn btn-primary mb-3" type="submit">Enviar</button>
-  </form>
+        contactos.forEach((c, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <th scope="row">${i + 1}</th>
+            <td>${c.nombre}</td>
+            <td>${c.correo}</td>
+            <td>${c.mensaje}</td>
+            <td>
+              <button class="btn btn-sm btn-warning me-1" onclick="editarMensaje(${c.id}, '${c.mensaje.replace(/'/g, "\\'")}')">Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="eliminarContacto(${c.id})">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Error al cargar contactos:', err);
+      }
+    }
 
-  <p id="respuesta"></p>
-    </div>
-
-  <script>
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
-      e.preventDefault(); // Evita el envío tradicional
-
+    // Enviar nuevo contacto
+    document.getElementById('contactForm').addEventListener('submit', async e => {
+      e.preventDefault();
       const data = {
-        nombre: document.getElementById('nombre').value,
-        email: document.getElementById('email').value,
-        mensaje: document.getElementById('mensaje').value
+        nombre: e.target.nombre.value,
+        correo: e.target.correo.value,
+        mensaje: e.target.mensaje.value
       };
-
-      fetch('http://localhost:3000/contacto', { // <-- Cambia la URL a tu backend
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Error en la respuesta');
-        return response.json();
-      })
-      .then(json => {
-        document.getElementById('respuesta').innerText = 'Mensaje enviado correctamente ✅';
-        console.log('Respuesta del backend:', json);
-      })
-      .catch(err => {
-        document.getElementById('respuesta').innerText = 'Hubo un error ❌';
-        console.error('Error al enviar:', err);
-      });
+      try {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Error al crear');
+        document.getElementById('respuesta').innerText = '✅ Registro creado';
+        e.target.reset();
+        await cargarContactos();
+      } catch (err) {
+        document.getElementById('respuesta').innerText = '❌ Error al crear';
+        console.error(err);
+      }
     });
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 
+    // Eliminar contacto por ID
+    async function eliminarContacto(id) {
+      if (!confirm('¿Eliminar este contacto?')) return;
+      try {
+        const res = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Error al eliminar');
+        await cargarContactos();
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
-    <footer class="text-center mt-5 py-3 bg-dark">
-        <p>&copy; @dewcry </p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    // Editar el mensaje de un contacto
+    async function editarMensaje(id, mensajeActual) {
+      const nuevo = prompt('Nuevo mensaje:', mensajeActual);
+      if (nuevo === null || nuevo.trim() === '') return;
+      try {
+        const res = await fetch(`${apiUrl}/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mensaje: nuevo })
+        });
+        if (!res.ok) throw new Error('Error al editar');
+        await cargarContactos();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Al cargar la página, llenamos la tabla
+    window.addEventListener('DOMContentLoaded', cargarContactos);
+</script>
+
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"
+></script>
 </body>
 </html>
+
