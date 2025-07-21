@@ -1,0 +1,40 @@
+PRACTICA PARA EL SEGUNDO PARCIAL 
+1. Montar un servidor Apache
+Crear un formulario con los siguientes campos: nombre, email y mensaje.
+
+OPCIONAL el uso de CSS o alguna librería como Bootstrap, Tailwind, etc. (esto es opcional, pero se considerará si lo implementan).
+
+2. Montar un servidor Node.js usando HTTP
+Implementar las operaciones HTTP básicas (POST, PUT, PATCH, DELETE) y responder con los códigos de estado correspondientes (200, 201, 400, 500, etc.).
+
+Para este punto, pueden elegir usar Express, pero obtendrán menos puntuación, ya que es un framework que facilita el desarrollo del backend.
+
+3. Conectar el formulario de la tarea 1 al servidor de la tarea 2
+El formulario creado en el punto 1 debe enviar los datos al servidor de la tarea 2.
+
+Es decir, el formulario debe funcionar como cliente y enviar los datos al servidor Node.js. Los datos enviados deben mostrarse en la consola del servidor (backend).
+
+4. (OPCIONAL) Puntos extra - Conexión con base de datos
+Los datos que se registran en el formulario en Apache deben enviarse a nuestro servidor Node.js, y este se conectará a una base de datos para registrar los datos en una tabla.
+
+Se tomará en cuenta si usan Docker para montar la base de datos.
+
+5. (OPCIONAL) Puntos extra - Uso de Git y GitHub
+Se tomará en cuenta si todo el proyecto está en repositorios de GitHub, con commits bien comentados y un adecuado manejo de ramas, etc.
+
+Este repositorio debe incluirse en su informe y enviarme el enlace.
+
+6. (OPCIONAL) Puntos extra - Implementación de Docker
+Se dará puntos extra si implementan Docker en cualquier parte del proyecto que consideren necesario.
+
+PRESENTAR TODO EN UN INFORME.
+
+El informe debe explicar de manera detallada el trabajo realizado, describiendo cada paso que llevaron a cabo durante la práctica. Asegúrense de incluir capturas de pantalla que muestren el desarrollo de cada parte del proceso.
+
+Además, defenderán el informe el día lunes, durante el cual tendrán que demostrar lo siguiente:
+
+Montar un servidor Apache2 (cliente)
+
+Montar un servidor Node.js (backend)
+
+Realizar la conexión entre el cliente y el servidor, demostrando el proceso de registro de datos.
